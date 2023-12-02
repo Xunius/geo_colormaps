@@ -1,0 +1,6 @@
+include LICENSE
+include geo_colormaps/colormap_list.md
+include geo_colormaps/data/SimHei.ttf
+recursive-include geo_colormaps/colormap_defs *
+recursive-include geo_colormaps/docs *
+recursive-include examples *.py
