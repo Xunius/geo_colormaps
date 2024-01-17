@@ -4,7 +4,7 @@
 from setuptools import find_packages, setup
 
 setup(name='geo_colormaps',
-        version='0.1.4',
+        version='0.1.5',
         description='geo_colormap is a collection of standard weather/ocean colormaps, for creating plots using `matplotlib`. It allows easy additions of custom colormaps using csv tables.',
         author='Guangzhi XU',
         author_email='xugzhi1987@gmail.com',
