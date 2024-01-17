@@ -45,6 +45,7 @@ def get_custom_def_folder() -> str:
 
     config_path = get_config_path()
     def_folder = os.path.join(config_path, 'geo_colormaps')
+    os.makedirs(def_folder, exist_ok=True)
 
     return def_folder
 

@@ -38,7 +38,7 @@ ax.pcolormesh(XX, YY, data,
               extend=CMA_COLORMAPS.TEMP_CMAP.extend)
 
 # plot colorbar
-cbar = TEMP_CMAP.plot_colorbar(ax, orientation='horizontal', spacing='uniform')
+cbar = CMA_COLORMAPS.TEMP_CMAP.plot_colorbar(ax, orientation='horizontal', spacing='uniform')
 fig.show()
 ```
 
