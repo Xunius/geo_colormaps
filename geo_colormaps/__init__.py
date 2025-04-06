@@ -1,7 +1,7 @@
 '''Load colormap defs into namespace of geo_colormaps
 
 Author: guangzhi XU (xugzhi1987@gmail.com)
-Update time: 2025-04-06 08:29:53
+Update time: 2025-04-06 21:11:52
 '''
 
 import os
@@ -127,7 +127,7 @@ for obj in all_groups:
 #######################################################################
 
 
-def list_cmaps(verbose: bool=False) -> dict:
+def list_cmaps(verbose: bool=True) -> dict:
     '''Print default colormaps and custom colormaps (defined in csv files)
 
     Returns:
@@ -183,7 +183,7 @@ def plot_cmaps() -> None:
     '''
 
     # get all cmaps in a dict
-    all_cmap_dict = list_cmaps()
+    all_cmap_dict = list_cmaps(verbose=False)
 
     # set up table
     n = len(all_cmap_dict)

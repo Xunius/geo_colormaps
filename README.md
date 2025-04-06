@@ -34,7 +34,7 @@ my_cmap = geo_colormaps.CMA_COLORMAPS.TEMP_CMAP
 XX, YY = ...
 data = ...
 
-# 绘制
+# 绘制数据
 fig, ax = plt.subplots()
 ax.pcolormesh(XX, YY, data,
               cmap=my_cmap.cmap,
@@ -59,7 +59,7 @@ fig.show()
 
 ```python
 import geo_colormaps
-geo_colormaps.list_cmaps(verbose=True)
+geo_colormaps.list_cmaps()
 ```
 
 示例输出：
