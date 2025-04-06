@@ -1,14 +1,18 @@
 '''Utitlity functions to load colormap definitions
 
 Author: guangzhi XU (xugzhi1987@gmail.com)
-Update time: 2023-11-28 13:25:44.
+Update time: 2025-04-04 22:21:21
 '''
 
 import os
+import traceback
 from typing import List
+
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
+
 from .colormap import ColorMapGroup, create_cmap_from_csv
+from .custom_errors import ColormapLoadError
 
 
 def get_config_path() -> str:
@@ -53,15 +57,16 @@ def get_custom_def_folder() -> str:
 def load_simhei_font() -> None:
     '''Load SimHei.ttf font file'''
 
-    font_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'SimHei.ttf')
+    font_file = os.path.join(os.path.dirname(__file__), 'data', 'SimHei.ttf')
 
     if not os.path.exists(font_file):
         return
 
     font_manager.fontManager.addfont(font_file)
-    fprop = font_manager.FontProperties(fname=font_file)
-    plt.rcParams['font.family'] = 'sans-serif'
-    plt.rcParams['font.sans-serif'] = fprop.get_name()
+    font_manager.FontProperties(fname=font_file)
+    plt.rcParams['font.family'] = 'SimHei'
+    plt.rcParams['axes.unicode_minus'] = False
+    #plt.rcParams['font.sans-serif'] = fprop.get_name()
 
     return
 
@@ -77,14 +82,14 @@ def load_colormaps(def_folder: str, image_folder: str) -> List:
         image_folder (str): base folder to save colorbar sample images.
 
     Returns:
-        names (list): list of tuples (ColorMapGroup name, ColorMapGroup obj).
+        cmap_group_list (list): list of ColorMapGroup obj.
     '''
 
     def_folder = os.path.abspath(def_folder)
     image_folder = os.path.abspath(image_folder)
     base_folder = def_folder
 
-    names = []
+    cmap_group_list = []
 
     # loop through sub folders
     for subdir in os.listdir(def_folder):
@@ -93,7 +98,7 @@ def load_colormaps(def_folder: str, image_folder: str) -> List:
 
         subdir_path = os.path.join(def_folder, subdir)
         img_folder = os.path.join(image_folder, subdir)
-        colormap_group = ColorMapGroup(name=subdir, folder=subdir_path,
+        colormap_group = ColorMapGroup(name=subdir.upper(), folder=subdir_path,
                                        base_folder=base_folder,
                                        img_folder=img_folder)
 
@@ -108,15 +113,18 @@ def load_colormaps(def_folder: str, image_folder: str) -> List:
 
             try:
                 cmap = create_cmap_from_csv(path)
-            except:
-                print(f'Failed to load colormap from file: {path}. Skip.')
+            except ColormapLoadError:
+                traceback.print_exc()
+            except Exception:
+                traceback.print_exc()
             else:
                 colormap_group.add(cmap)
 
         colormap_group.plot_colormaps()
-        names.append((subdir.upper(), colormap_group))
+        #names.append((subdir.upper(), colormap_group))
+        cmap_group_list.append(colormap_group)
 
-    return names
+    return cmap_group_list
 
 
 load_simhei_font()

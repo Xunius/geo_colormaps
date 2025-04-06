@@ -1,7 +1,7 @@
-'''Demo script, plot ERA5 SST using CMA SST colormap
+'''Demo script, plot ERA-I SST using CMA SST colormap
 
 Author: guangzhi XU (xugzhi1987@gmail.com)
-Update time: 2023-11-23 13:49:00.
+Update time: 2025-04-04 15:50:20
 '''
 
 import os
@@ -12,13 +12,12 @@ import sys
 current_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(current_dir, '..', '..'))
 
-
 import geo_colormaps
 
 
 if __name__ == '__main__':
 
-    DATA_FILE_NAME = os.path.join(current_dir, '..', 'tests',
+    DATA_FILE_NAME = os.path.join(current_dir, '..', 'geo_colormaps', 'tests',
                                   'fixtures', 'sample_erai_data.npz')
 
     # read a data file and load data

@@ -1,7 +1,7 @@
 '''自定义matplotlib色标实现
 
 Author: guangzhi XU (xugzhi1987@gmail.com)
-Update time: 2023-11-30 14:44:31.
+Update time: 2025-04-05 15:26:47
 '''
 
 
@@ -14,11 +14,12 @@ import warnings
 from typing import Tuple, List, Union, Optional
 from collections import namedtuple
 from dataclasses import dataclass, field
+
 import numpy as np
-from numpy.typing import NDArray
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
+from .custom_errors import ColormapLoadError
 
 # data to store a single level, with these fields:
 # vmin, vmax: min/max value of the level, e.g. -30, -20
@@ -54,6 +55,16 @@ class ColorMap:
     description  : str  = ''
 
 
+    def __repr__(self):
+
+        full_name = getattr(self, 'full_name', None)
+        if full_name is not None:
+            res = f'ColorMap(name={self.name}, unit={self.unit}, full_name={full_name}, description={self.description}'
+        else:
+            res = f'ColorMap(name={self.name}, unit={self.unit}, description={self.description}'
+        return res
+
+
     def __post_init__(self):
 
         if len(self.level_colors) == 0:
@@ -86,7 +97,7 @@ class ColorMap:
 
 
     @staticmethod
-    def get_bin_centers(bin_edges: Union[List, NDArray]) -> NDArray:
+    def get_bin_centers(bin_edges: Union[List, np.ndarray]) -> np.ndarray:
         '''Get bin center values from bin edges'''
 
         bin_edges = np.array(bin_edges)
@@ -231,14 +242,17 @@ class ColorMap:
         '''
         self.plot_colorbar(ax)
 
-        ax.set_title(self.description)
+        #ax.set_title(self.description)
+        title = getattr(self, 'full_name', self.description)
+        ax.set_title(title)
 
         #fig.show()
 
         return ax
 
 
-    def plot_colorbar(self, ax, cax=None, orientation='vertical', spacing='uniform'):
+    def plot_colorbar(self, ax, cax=None, orientation='vertical', spacing='uniform',
+                      fontsize: Optional[int]=None):
 
         fig = ax.get_figure()
         cbar = fig.colorbar(mpl.cm.ScalarMappable(norm=self.norm, cmap=self.cmap),
@@ -251,7 +265,7 @@ class ColorMap:
                             label=self.unit)
 
         if self.tick_labels is not None:
-            cbar.set_ticklabels(self.tick_labels)
+            cbar.set_ticklabels(self.tick_labels, fontsize=fontsize)
 
         return cbar
 
@@ -351,8 +365,16 @@ class ColorMapGroup:
     description : str = ''
 
     def add(self, new: Union[ColorMap, 'ColorMapGroup']) -> None:
+        '''Add new member sub-group or ColorMap to group'''
+        # add member to collection dict
         self.collection[new.name] = new
+        # set member as attribute
         self.__setattr__(new.name, new)
+        # set self.name as member attribute
+        setattr(new, 'group_name', self.name.upper())
+        # set member's full name attribute
+        setattr(new, 'full_name', f'{self.name.upper()}.{new.name.upper()}')
+
         return
 
     def remove(self, thing: Union[str, ColorMap, 'ColorMapGroup']) -> None:
@@ -432,7 +454,55 @@ def create_cmap_from_csv(file_path: str) -> ColorMap:
     '''Helper function to create a colormap obj from csv file'''
 
     cmap = ColorMap()
-    cmap.read_from_csv(file_path)
+    try:
+        cmap.read_from_csv(file_path)
+    except Exception:
+        raise ColormapLoadError(f'Failed to load colormap from file: {file_path}.')
 
     return cmap
+
+
+def create_cmap_from_levels(levels: Union[list, tuple, np.ndarray],
+                            unit: Optional[str]='',
+                            cmap=None) -> ColorMap:
+    '''Helper function to create a colormap obj from given levels and a mpl colormap
+
+    '''
+
+    if cmap is None:
+        cmap = plt.cm.gist_rainbow
+    elif isinstance(cmap, str):
+        cmap = getattr(plt.cm, cmap)
+    else:
+        cmap = plt.cm.gist_rainbow
+
+    color_list = []
+
+    if all(isinstance(x, tuple) for x in levels):
+        # if levels are all tuples, this is a categorical colormap
+        # e.g. [(0, ), (1, )], or
+        # e.g. [(0, 'class-1'), (1, 'class-2')]
+
+        n_levels = len(levels)
+        for ii, levelii in enumerate(levels):
+            left, *label = levelii
+            if len(label):
+                label = str(label[0])
+            else:
+                label = str(left)
+            colorii = cmap(ii / n_levels, bytes=True)
+            levelii = Level(left, left, colorii, label)
+            color_list.append(levelii)
+
+    else:
+        n_levels = len(levels) - 1
+        for ii, (left, right) in enumerate(zip(levels[:-1], levels[1:])):
+            colorii = cmap(ii / n_levels, bytes=True)
+            levelii = Level(left, right, colorii, '')
+            color_list.append(levelii)
+
+    res = ColorMap('anoymous_cmap', unit, level_colors=color_list)
+    res.__post_init__()
+
+    return res
 

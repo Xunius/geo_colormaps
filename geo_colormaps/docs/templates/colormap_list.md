@@ -6,7 +6,7 @@
 ## {{ group.name }}
 
 + 色标定义文件夹：`base_folder = {{ group.base_folder }}`
-+ 色标实例图文件夹: `img_folder = {{ group.img_folder }}`
++ 色标示例图文件夹: `img_folder = {{ group.img_folder }}`
 
 | 色标描述      | 变量名        | 定义文件位置        | 示例图位置      |
 | --------------| ------------- | --------------------| --------------- |
