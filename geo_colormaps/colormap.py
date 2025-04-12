@@ -1,7 +1,7 @@
 '''自定义matplotlib色标实现
 
 Author: guangzhi XU (xugzhi1987@gmail.com)
-Update time: 2025-04-05 15:26:47
+Update time: 2025-04-12 17:01:14
 '''
 
 
@@ -78,7 +78,7 @@ class ColorMap:
             self.labels = res
 
         # colorbar ticks
-        if all([x == '' for x in self.labels]):
+        if all([x == '' or x is None for x in self.labels]):
             # if no labels, use boundary numbers as ticks
             self.ticks = self.bin_edges
             self.tick_labels = None
@@ -167,29 +167,62 @@ class ColorMap:
         # levels in the middle
         mid_levels = self.level_colors[int(extend_left):len(self.level_colors)-\
                 int(extend_right)]
+        n_levels = len(mid_levels)
 
+        # colors in the middle
+        colors = [self.norm_rgb(x.rgb_tuple) for x in mid_levels]
+
+        # labels in the middle
+        labels = [x.label for x in mid_levels]
+
+        # determine colormap is discrete or continous
         if all([x.vmin == x.vmax for x in mid_levels]):
             # if vmin == vmax for all levels
             bin_centers = [x.vmin for x in mid_levels]
-            bin_edges = [bin_centers[0]*2 - bin_centers[1]] +\
-                    bin_centers +\
-                    [bin_centers[-1]*2 - bin_centers[-2]]
-            bin_edges = self.get_bin_centers(bin_edges)
+
+            if all([x is None or len(x)==0 for x in labels]):
+                # if no labels given, create continuous colormap
+                # bin edges are the same as bin centers
+                bin_edges = bin_centers.copy()
+                is_continuous = True
+            else:
+                # if labels given, create discrete colormap
+                # create bin edges from bin centers
+                bin_edges = [bin_centers[0]*2 - bin_centers[1]] +\
+                        bin_centers +\
+                        [bin_centers[-1]*2 - bin_centers[-2]]
+                bin_edges = self.get_bin_centers(bin_edges)
+
+                is_continuous = False
         else:
-            # if vmin != vmax for all levels
+            # if vmin != vmax for all levels, create discrete colormap
             bin_edges = [mid_levels[0].vmin,] + [x.vmax for x in mid_levels]
             bin_centers = self.get_bin_centers(bin_edges)
 
-        colors = [self.norm_rgb(x.rgb_tuple) for x in mid_levels]
-        labels = [x.label for x in mid_levels]
-        n_levels = len(mid_levels)
+            is_continuous = False
 
-        assert len(bin_edges) - len(colors) == 1, 'length wrong'
-        assert len(bin_centers) == len(colors), 'length wrong'
-
-        # create cmap obj
         name = self.name or 'my_cmap'
-        cmap = mpl.colors.ListedColormap(colors, name=name, N=len(colors))
+
+        if is_continuous:
+            assert len(bin_centers) == len(bin_edges), 'length wrong'
+            assert len(bin_centers) == len(colors), 'length wrong'
+            # create continuous colormap
+            cmap = create_continuous_cmap(mid_levels, name)
+            # create norm
+            norm = mpl.colors.Normalize(vmin=np.min(bin_centers),
+                                        vmax=np.max(bin_centers))
+
+            self.is_continuous = True
+        else:
+            # create discrete colormap
+            assert len(bin_edges) - len(colors) == 1, 'length wrong'
+            assert len(bin_centers) == len(colors), 'length wrong'
+
+            cmap = mpl.colors.ListedColormap(colors, name=name, N=len(colors))
+            # create norm
+            norm = mpl.colors.BoundaryNorm(bin_edges, n_levels)
+
+            self.is_continuous = False
 
         # set overflow
         if extend_left:
@@ -199,10 +232,6 @@ class ColorMap:
             cmap.set_over(self.norm_rgb(last_level.rgb_tuple))
 
         cmap.colorbar_extend = extend
-
-        # create norm
-        norm = mpl.colors.BoundaryNorm(bin_edges, n_levels)
-
 
         return bin_edges, bin_centers, cmap, norm, extend, labels
 
@@ -313,7 +342,7 @@ class ColorMap:
 
             self.unit = self.unit.strip("'")
 
-            # skip header line
+            # skip header line: vmin, vmax, r, g, b, label
             fin.readline()
 
             while True:
@@ -339,6 +368,7 @@ class ColorMap:
                 g = int(g.strip(' '))
                 b = int(b.strip(' '))
                 label = label.strip(' ')
+
                 ll = Level(vmin, vmax, (r, g, b), label)
                 self.level_colors.append(ll)
 
@@ -464,9 +494,20 @@ def create_cmap_from_csv(file_path: str) -> ColorMap:
 
 def create_cmap_from_levels(levels: Union[list, tuple, np.ndarray],
                             unit: Optional[str]='',
-                            cmap=None) -> ColorMap:
+                            cmap: Union[None, str]=None,
+                            is_continuous: bool=False) -> ColorMap:
     '''Helper function to create a colormap obj from given levels and a mpl colormap
 
+    Args:
+        levels (list, tuple or 1darray): 1d sequence of value levels.
+    Keyword Args:
+        unit (str): unit for values in levels.
+        cmap (str or None): name of built-in matplotlib colormap name, e.g. 'jet', 'rainbow'.
+            If None, use default (gist_rainbow).
+        is_continuous (bool): if True, create continuous colormap. If False,
+            colormap is discrete.
+    Returns:
+        cmap (ColorMap): created ColorMap obj.
     '''
 
     if cmap is None:
@@ -485,24 +526,78 @@ def create_cmap_from_levels(levels: Union[list, tuple, np.ndarray],
 
         n_levels = len(levels)
         for ii, levelii in enumerate(levels):
-            left, *label = levelii
-            if len(label):
-                label = str(label[0])
+            leftii, *labelii = levelii
+            if len(labelii):
+                labelii = str(labelii[0])
             else:
-                label = str(left)
+                labelii = str(leftii)
             colorii = cmap(ii / n_levels, bytes=True)
-            levelii = Level(left, left, colorii, label)
+            levelii = Level(leftii, leftii, colorii, labelii)
             color_list.append(levelii)
 
     else:
-        n_levels = len(levels) - 1
-        for ii, (left, right) in enumerate(zip(levels[:-1], levels[1:])):
-            colorii = cmap(ii / n_levels, bytes=True)
-            levelii = Level(left, right, colorii, '')
-            color_list.append(levelii)
+        if is_continuous:
+            # if continuous colormap
+            n_levels = len(levels)
+            for ii, leftii in enumerate(levels):
+                colorii = cmap(ii / n_levels, bytes=True)
+                labelii = None
+                levelii = Level(leftii, leftii, colorii, labelii)
+                color_list.append(levelii)
+        else:
+            # if create discrete colormap, use values in levels as bin edges
+            n_levels = len(levels) - 1
+            for ii, (leftii, rightii) in enumerate(zip(levels[:-1], levels[1:])):
+                colorii = cmap(ii / n_levels, bytes=True)
+                labelii = str(leftii)
+                levelii = Level(leftii, rightii, colorii, labelii)
+                color_list.append(levelii)
 
     res = ColorMap('anoymous_cmap', unit, level_colors=color_list)
     res.__post_init__()
 
     return res
 
+
+def create_continuous_cmap(color_points: list, name: Optional[str]=None):
+    """Creates a continuous colormap with linear interpolation between specified color points.
+
+    Args:
+        color_points (list): .ist of Level objects, specifying the colormap anchors.
+    Keyword Args:
+        name (str or None): optional name for new colormap>
+    Returns:
+        cmap (matplotlib.colors.LinearSegmentedColormap): The created colormap.
+    """
+
+    if len(color_points) < 2:
+        raise ValueError("At least two color points are required.")
+
+    # Sort color points by their values
+    sorted_points = sorted(color_points, key=lambda x: x.vmin)
+    values = [x.vmin for x in sorted_points]
+    colors = [ColorMap.norm_rgb(x.rgb_tuple) for x in sorted_points]
+
+    vmin = min(values)
+    vmax = max(values)
+    if vmin == vmax:
+        raise ValueError("All values in color_points are the same. Cannot create a colormap.")
+
+    # Normalize the values to [0, 1]
+    positions = [(v - vmin) / (vmax - vmin) for v in values]
+
+    # Prepare the color dictionary for LinearSegmentedColormap
+    cdict = {'red': [], 'green': [], 'blue': [], 'alpha': []}
+    for pos, color in zip(positions, colors):
+        r, g, b, *a = color
+        a = a[0] if len(a) else 1.0 # optional alpha channel
+        cdict['red'].append((pos, r, r))
+        cdict['green'].append((pos, g, g))
+        cdict['blue'].append((pos, b, b))
+        cdict['alpha'].append((pos, a, a))
+
+    # Create the colormap
+    name = name or 'my_continuous_cmap'
+    cmap = mpl.colors.LinearSegmentedColormap(name, cdict)
+
+    return cmap

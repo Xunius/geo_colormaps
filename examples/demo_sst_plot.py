@@ -1,7 +1,7 @@
 '''Demo script, plot ERA-I SST using CMA SST colormap
 
 Author: guangzhi XU (xugzhi1987@gmail.com)
-Update time: 2025-04-04 15:50:20
+Update time: 2025-04-12 16:44:53
 '''
 
 import os
@@ -39,9 +39,30 @@ if __name__ == '__main__':
 
     # contourf plot
     ax.contourf(lons, lats, sst,
-                     cmap=cmap_obj.cmap,
-                     norm=cmap_obj.norm,
-                     extend=cmap_obj.extend)
+                cmap=cmap_obj.cmap,
+                norm=cmap_obj.norm,
+                extend=cmap_obj.extend)
+
+    # plot colrobar
+    cmap_obj.plot_colorbar(ax=ax)
+
+    figure.show()
+
+
+    # plot using a continuous colormap
+    # create figure and axis
+    figure = plt.figure(figsize=(8, 6), dpi=100)
+    ax = figure.add_subplot(111)
+
+    # get the colormap object
+    cmap_obj = geo_colormaps.CMA_COLORMAPS.SST_CONTI_CMAP
+
+    # contourf plot
+    ax.pcolormesh(lons, lats, sst,
+                  cmap=cmap_obj.cmap,
+                  norm=cmap_obj.norm)
+
+    ax.set_title('Demo plot, continuous colormap')
 
     # plot colrobar
     cmap_obj.plot_colorbar(ax=ax)

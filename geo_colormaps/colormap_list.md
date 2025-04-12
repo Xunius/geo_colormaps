@@ -13,6 +13,7 @@
 | 降水量距平百分率分布图配色表     | `CMA_COLORMAPS.PRE_ANO_CMAP` | `<base_folder>/CMA_COLORMAPS/PRE_ANO_CMAP.csv` | `<img_folder>/降水量距平百分率分布图配色表_demo.png` |
 | 变温分布图配色表     | `CMA_COLORMAPS.DTEMP_CMAP` | `<base_folder>/CMA_COLORMAPS/DTEMP_CMAP.csv` | `<img_folder>/变温分布图配色表_demo.png` |
 | 风力等级（6级以上）分布图配色表     | `CMA_COLORMAPS.WIND_LEVEL_CMAP` | `<base_folder>/CMA_COLORMAPS/WIND_LEVEL_CMAP.csv` | `<img_folder>/风力等级（6级以上）分布图配色表_demo.png` |
+| 海表温度色标(采自国家气象信息中心，渐变版)     | `CMA_COLORMAPS.SST_CONTI_CMAP` | `<base_folder>/CMA_COLORMAPS/SST_CONTI_CMAP.csv` | `<img_folder>/海表温度色标(采自国家气象信息中心，渐变版)_demo.png` |
 | 3h累积降水量实况色标(采自国家气象信息中心)     | `CMA_COLORMAPS.RAIN_3H_CMAP` | `<base_folder>/CMA_COLORMAPS/RAIN_3H_CMAP.csv` | `<img_folder>/3h累积降水量实况色标(采自国家气象信息中心)_demo.png` |
 | 10m风速色标(6.25km 1h 采自国家气象信息中心)     | `CMA_COLORMAPS.WS10_CMAP` | `<base_folder>/CMA_COLORMAPS/WS10_CMAP.csv` | `<img_folder>/10m风速色标(6.25km 1h 采自国家气象信息中心)_demo.png` |
 | 气温实况色标(采自国家气象信息中心)     | `CMA_COLORMAPS.TEMP_RT_CMAP` | `<base_folder>/CMA_COLORMAPS/TEMP_RT_CMAP.csv` | `<img_folder>/气温实况色标(采自国家气象信息中心)_demo.png` |
@@ -48,6 +49,9 @@
 
 
 ![风力等级（6级以上）分布图配色表](<images/cma_colormaps/风力等级（6级以上）分布图配色表_demo.png>)
+
+
+![海表温度色标(采自国家气象信息中心，渐变版)](<images/cma_colormaps/海表温度色标(采自国家气象信息中心，渐变版)_demo.png>)
 
 
 ![3h累积降水量实况色标(采自国家气象信息中心)](<images/cma_colormaps/3h累积降水量实况色标(采自国家气象信息中心)_demo.png>)
@@ -169,8 +173,10 @@
 | 色标描述      | 变量名        | 定义文件位置        | 示例图位置      |
 | --------------| ------------- | --------------------| --------------- |
 | 6h降水量色标     | `OTHER_COLORMAPS.RAIN_6H_CMAP` | `<base_folder>/OTHER_COLORMAPS/RAIN_6H_CMAP.csv` | `<img_folder>/6h降水量色标_demo.png` |
+| 云顶温度色标     | `OTHER_COLORMAPS.CTT_CONTI_CMAP` | `<base_folder>/OTHER_COLORMAPS/CTT_CONTI_CMAP.csv` | `<img_folder>/云顶温度色标_demo.png` |
 | 3h降水量色标     | `OTHER_COLORMAPS.RAIN_3H_CMAP` | `<base_folder>/OTHER_COLORMAPS/RAIN_3H_CMAP.csv` | `<img_folder>/3h降水量色标_demo.png` |
 | 1h降水量色标     | `OTHER_COLORMAPS.RAIN_1H_CMAP` | `<base_folder>/OTHER_COLORMAPS/RAIN_1H_CMAP.csv` | `<img_folder>/1h降水量色标_demo.png` |
+| 云顶高色标     | `OTHER_COLORMAPS.CTH_CONTI_CMAP` | `<base_folder>/OTHER_COLORMAPS/CTH_CONTI_CMAP.csv` | `<img_folder>/云顶高色标_demo.png` |
 | 相对湿度色标     | `OTHER_COLORMAPS.RH_CMAP` | `<base_folder>/OTHER_COLORMAPS/RH_CMAP.csv` | `<img_folder>/相对湿度色标_demo.png` |
 | 12h降水量色标     | `OTHER_COLORMAPS.RAIN_12H_CMAP` | `<base_folder>/OTHER_COLORMAPS/RAIN_12H_CMAP.csv` | `<img_folder>/12h降水量色标_demo.png` |
 | 温度色标     | `OTHER_COLORMAPS.TEMP_CMAP` | `<base_folder>/OTHER_COLORMAPS/TEMP_CMAP.csv` | `<img_folder>/温度色标_demo.png` |
@@ -184,10 +190,16 @@
 ![6h降水量色标](<images/other_colormaps/6h降水量色标_demo.png>)
 
 
+![云顶温度色标](<images/other_colormaps/云顶温度色标_demo.png>)
+
+
 ![3h降水量色标](<images/other_colormaps/3h降水量色标_demo.png>)
 
 
 ![1h降水量色标](<images/other_colormaps/1h降水量色标_demo.png>)
+
+
+![云顶高色标](<images/other_colormaps/云顶高色标_demo.png>)
 
 
 ![相对湿度色标](<images/other_colormaps/相对湿度色标_demo.png>)

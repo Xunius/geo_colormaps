@@ -145,7 +145,8 @@ mpl_cmp       =  'rainbow'                                     # matplotlib自�
 
 cmap_obj   = geo_colormaps.colormap.create_cmap_from_levels(custom_levels,
                                                             custom_unit,
-                                                            mpl_cmp)
+                                                            mpl_cmp,
+                                                            is_continuous=False)
 
 # 使用创建的色标绘图：
 XX, YY = ...
@@ -162,6 +163,32 @@ cmap_obj.plot_colorbar(ax=ax)
 fig.show()
 ```
 
+若想定义渐变类型的色标，仅需在调用`create_cmap_from_levels()`时传入`is_continuous=True`,
+
+例如：
+
+```python
+custom_levels = [None] + list(np.arange(10, 32, 2)) + [None]
+custom_unit   = r'$^{\circ}C$'
+mpl_cmp       = 'rainbow'
+cmap_obj      = geo_colormaps.colormap.create_cmap_from_levels(custom_levels,
+                                                               custom_unit,
+                                                               mpl_cmp,
+                                                               is_continuous=True)
+
+XX, YY = ...
+data = ...
+
+fig, ax = plt.subplots()
+ax.pcolormesh(XX, YY, data,
+            cmap=cmap_obj.cmap,
+            norm=cmap_obj.norm)
+
+# 绘制色标
+cmap_obj.plot_colorbar(ax=ax)
+fig.show()
+```
+
 若想定义离散/分类型的色标，仅需将`custom_levels`定义写成以下形式：
 
 ```
@@ -172,9 +199,9 @@ custom_levels = [(discrete_level, level_label), (discrete_level, level_label), .
 
 ```python
 
-custom_levels = [(10, 'Ten'), (20, 'Twenty')]
+custom_levels = [(10, 'Ten'), (20, 'Twenty'), (30, 'Thirty')]
 # can also omit the level label, then the discrete level it self will be used as label:
-#custom_levels = [(10, ), (20, )]
+#custom_levels = [(10, ), (20, ), (30, )]
 custom_unit   = r'$^{\circ}C$'
 mpl_cmp       = 'rainbow'
 cmap_obj      = geo_colormaps.colormap.create_cmap_from_levels(custom_levels,
@@ -182,7 +209,8 @@ cmap_obj      = geo_colormaps.colormap.create_cmap_from_levels(custom_levels,
                                                             mpl_cmp)
 ```
 
-也可省略`level_label`, 此时类别标签将自动使用`discrete_level`。
+也可省略`level_label`, 但仍然必须使用元组，例如：`custom_levels = [(10, ), (20, ), (30, )]`,
+此时类别标签将自动使用`discrete_level`。
 
 
 使用`create_cmap_from_levels()`定义色标的绘图示例图：
@@ -228,33 +256,34 @@ geo_colormaps.colormap_picker()
 #### 包含色标
 
 
-| 色标描述                                              | 变量名                                 | 定义文件位置                                      | 示例图位置               |
-| ---------------------------------                     | -------------------------------------- | -------------------------------------             | ------------------------ |
-| 预报（警报）等级分布图配色表                          | `CMA_COLORMAPS.ALARM_LEVEL_CMAP`       | `colormap_defs/cma_colormaps/alarm_level.csv`     | `images/cma_colormaps/`  |
-| 气象干旱等级分布图配色表                              | `CMA_COLORMAPS.DRAUGHT_LEVEL_CMAP`     | `colormap_defs/cma_colormaps/draught_level.csv`   | ~                        |
-| 变温分布图配色表                                      | `CMA_COLORMAPS.DTEMP_CMAP`             | `colormap_defs/cma_colormaps/dtemp.csv`           | ~                        |
-| 洪涝等级分布图配色表                                  | `CMA_COLORMAPS.FLOOD_LEVEL_CMAP`       | `colormap_defs/cma_colormaps/flood_level.csv`     | ~                        |
-| 雾区分布图配色表                                      | `CMA_COLORMAPS.FOG_CMAP`               | `colormap_defs/cma_colormaps/fog.csv`             | ~                        |
-| 降水量距平百分率分布图配色表                          | `CMA_COLORMAPS.PRE_ANO_CMAP`           | `colormap_defs/cma_colormaps/pre_ano.csv`         | ~                        |
-| 降雨量等级分布图配色表                                | `CMA_COLORMAPS.PRE_LEVEL_CMAP`         | `colormap_defs/cma_colormaps/pre_level.csv`       | ~                        |
-| 累计降雨量分布图配色表                                | `CMA_COLORMAPS.PRE_TOTAL_CMAP`         | `colormap_defs/cma_colormaps/pre_total.csv`       | ~                        |
-| 相对湿度分布图配色表                                  | `CMA_COLORMAPS.RH_CMAP`                | `colormap_defs/cma_colormaps/rh.csv`              | ~                        |
-| 沙尘天气等级分布图配色表                              | `CMA_COLORMAPS.SANDSTORM_LEVEL_CMAP`   | `colormap_defs/cma_colormaps/sandstorm_level.csv` | ~                        |
-| 积雪分布图配色表                                      | `CMA_COLORMAPS.SNOW_DEPTH_CMAP`        | `colormap_defs/cma_colormaps/snow_depth.csv`      | ~                        |
-| 降雪量等级分布图配色表                                | `CMA_COLORMAPS.SNOW_LEVEL_CMAP`        | `colormap_defs/cma_colormaps/snow_level.csv`      | ~                        |
-| 气温距平分布图配色表                                  | `CMA_COLORMAPS.TEMP_ANO_CMAP`          | `colormap_defs/cma_colormaps/temp_ano.csv`        | ~                        |
-| 气温分布图配色表                                      | `CMA_COLORMAPS.TEMP_CMAP`              | `colormap_defs/cma_colormaps/temp.csv`            | ~                        |
-| 风力等级（6级以上）分布图配色表                       | `CMA_COLORMAPS.WIND_LEVEL_CMAP`        | `colormap_defs/cma_colormaps/wind_level.csv`      | ~                        |
-| 1h累积降水量实况色标(采自国家气象信息中心)            | `CMA_COLORMAPS.RAIN_1H_CMAP`           | `colormap_defs/cma_colormaps/rain_1h.csv`         | ~                        |
-| 3h累积降水量实况色标(采自国家气象信息中心)            | `CMA_COLORMAPS.RAIN_3H_CMAP`           | `colormap_defs/cma_colormaps/rain_3h.csv`         | ~                        |
-| 气温实况色标(采自国家气象信息中心)                    | `CMA_COLORMAPS.TEMP_RT_CMAP`           | `colormap_defs/cma_colormaps/temp_rt.csv`         | ~                        |
-| 10m风速色标(6.25km 1h 采自国家气象信息中心)           | `CMA_COLORMAPS.WS10_CMAP`              | `colormap_defs/cma_colormaps/ws10.csv`            | ~                        |
-| 海平面气压色标(台风动力诊断 采自国家气象信息中心)     | `CMA_COLORMAPS.SLP_CMAP`               | `colormap_defs/cma_colormaps/slp.csv`             | ~                        |
-| 10m风速色标(台风动力诊断 采自国家气象信息中心)        | `CMA_COLORMAPS.WS_TYPHOON_CMAP`        | `colormap_defs/cma_colormaps/ws10_typhoon.csv`    | ~                        |
-| 850hPa相对湿度色标(台风湿度诊断 采自国家气象信息中心) | `CMA_COLORMAPS.RH850_CMAP`             | `colormap_defs/cma_colormaps/rh850.csv`           | ~                        |
-| 海表温度色标(采自国家气象信息中心)                    | `CMA_COLORMAPS.SST_CMAP`               | `colormap_defs/cma_colormaps/sst.csv`             | ~                        |
-| 最低能见度色标(采自国家气象信息中心)                  | `CMA_COLORMAPS.VIS_CMAP`               | `colormap_defs/cma_colormaps/vis.csv`             | ~                        |
-
+| 色标描述      | 变量名        | 定义文件位置        | 示例图位置      |
+| --------------| ------------- | --------------------| --------------- |
+| 降水量距平百分率分布图配色表     | `CMA_COLORMAPS.PRE_ANO_CMAP` | `<base_folder>/CMA_COLORMAPS/PRE_ANO_CMAP.csv` | `<img_folder>/降水量距平百分率分布图配色表_demo.png` |
+| 变温分布图配色表     | `CMA_COLORMAPS.DTEMP_CMAP` | `<base_folder>/CMA_COLORMAPS/DTEMP_CMAP.csv` | `<img_folder>/变温分布图配色表_demo.png` |
+| 风力等级（6级以上）分布图配色表     | `CMA_COLORMAPS.WIND_LEVEL_CMAP` | `<base_folder>/CMA_COLORMAPS/WIND_LEVEL_CMAP.csv` | `<img_folder>/风力等级（6级以上）分布图配色表_demo.png` |
+| 海表温度色标(采自国家气象信息中心，渐变版)     | `CMA_COLORMAPS.SST_CONTI_CMAP` | `<base_folder>/CMA_COLORMAPS/SST_CONTI_CMAP.csv` | `<img_folder>/海表温度色标(采自国家气象信息中心，渐变版)_demo.png` |
+| 3h累积降水量实况色标(采自国家气象信息中心)     | `CMA_COLORMAPS.RAIN_3H_CMAP` | `<base_folder>/CMA_COLORMAPS/RAIN_3H_CMAP.csv` | `<img_folder>/3h累积降水量实况色标(采自国家气象信息中心)_demo.png` |
+| 10m风速色标(6.25km 1h 采自国家气象信息中心)     | `CMA_COLORMAPS.WS10_CMAP` | `<base_folder>/CMA_COLORMAPS/WS10_CMAP.csv` | `<img_folder>/10m风速色标(6.25km 1h 采自国家气象信息中心)_demo.png` |
+| 气温实况色标(采自国家气象信息中心)     | `CMA_COLORMAPS.TEMP_RT_CMAP` | `<base_folder>/CMA_COLORMAPS/TEMP_RT_CMAP.csv` | `<img_folder>/气温实况色标(采自国家气象信息中心)_demo.png` |
+| 海表温度色标(采自国家气象信息中心)     | `CMA_COLORMAPS.SST_CMAP` | `<base_folder>/CMA_COLORMAPS/SST_CMAP.csv` | `<img_folder>/海表温度色标(采自国家气象信息中心)_demo.png` |
+| 洪涝等级分布图配色表     | `CMA_COLORMAPS.FLOOD_LEVEL_CMAP` | `<base_folder>/CMA_COLORMAPS/FLOOD_LEVEL_CMAP.csv` | `<img_folder>/洪涝等级分布图配色表_demo.png` |
+| 沙尘天气等级分布图配色表     | `CMA_COLORMAPS.SANDSTORM_LEVEL_CMAP` | `<base_folder>/CMA_COLORMAPS/SANDSTORM_LEVEL_CMAP.csv` | `<img_folder>/沙尘天气等级分布图配色表_demo.png` |
+| 雾区分布图配色表     | `CMA_COLORMAPS.FOG_CMAP` | `<base_folder>/CMA_COLORMAPS/FOG_CMAP.csv` | `<img_folder>/雾区分布图配色表_demo.png` |
+| 1h累积降水量实况色标(采自国家气象信息中心)     | `CMA_COLORMAPS.RAIN_1H_CMAP` | `<base_folder>/CMA_COLORMAPS/RAIN_1H_CMAP.csv` | `<img_folder>/1h累积降水量实况色标(采自国家气象信息中心)_demo.png` |
+| 10m风速色标(台风动力诊断 采自国家气象信息中心)     | `CMA_COLORMAPS.WS10_TYPHOON_CMAP` | `<base_folder>/CMA_COLORMAPS/WS10_TYPHOON_CMAP.csv` | `<img_folder>/10m风速色标(台风动力诊断 采自国家气象信息中心)_demo.png` |
+| 降雨量等级分布图配色表     | `CMA_COLORMAPS.PRE_LEVEL_CMAP` | `<base_folder>/CMA_COLORMAPS/PRE_LEVEL_CMAP.csv` | `<img_folder>/降雨量等级分布图配色表_demo.png` |
+| 相对湿度分布图配色表     | `CMA_COLORMAPS.RH_CMAP` | `<base_folder>/CMA_COLORMAPS/RH_CMAP.csv` | `<img_folder>/相对湿度分布图配色表_demo.png` |
+| 海平面气压色标(台风动力诊断 采自国家气象信息中心)     | `CMA_COLORMAPS.SLP_CMAP` | `<base_folder>/CMA_COLORMAPS/SLP_CMAP.csv` | `<img_folder>/海平面气压色标(台风动力诊断 采自国家气象信息中心)_demo.png` |
+| 积雪分布图配色表     | `CMA_COLORMAPS.SNOW_DEPTH_CMAP` | `<base_folder>/CMA_COLORMAPS/SNOW_DEPTH_CMAP.csv` | `<img_folder>/积雪分布图配色表_demo.png` |
+| 最低能见度色标(采自国家气象信息中心)     | `CMA_COLORMAPS.VIS_CMAP` | `<base_folder>/CMA_COLORMAPS/VIS_CMAP.csv` | `<img_folder>/最低能见度色标(采自国家气象信息中心)_demo.png` |
+| 累计降雨量分布图配色表     | `CMA_COLORMAPS.PRE_TOTAL_CMAP` | `<base_folder>/CMA_COLORMAPS/PRE_TOTAL_CMAP.csv` | `<img_folder>/累计降雨量分布图配色表_demo.png` |
+| 气温分布图配色表     | `CMA_COLORMAPS.TEMP_CMAP` | `<base_folder>/CMA_COLORMAPS/TEMP_CMAP.csv` | `<img_folder>/气温分布图配色表_demo.png` |
+| 气象干旱等级分布图配色表     | `CMA_COLORMAPS.DRAUGHT_LEVEL_CMAP` | `<base_folder>/CMA_COLORMAPS/DRAUGHT_LEVEL_CMAP.csv` | `<img_folder>/气象干旱等级分布图配色表_demo.png` |
+| 预报（警报）等级分布图配色表     | `CMA_COLORMAPS.ALARM_LEVEL_CMAP` | `<base_folder>/CMA_COLORMAPS/ALARM_LEVEL_CMAP.csv` | `<img_folder>/预报（警报）等级分布图配色表_demo.png` |
+| 海平面气压色标(台风动力诊断 采自国家气象信息中心)     | `CMA_COLORMAPS.SLP_REVERSED_CMAP` | `<base_folder>/CMA_COLORMAPS/SLP_REVERSED_CMAP.csv` | `<img_folder>/海平面气压色标(台风动力诊断 采自国家气象信息中心)_demo.png` |
+| 降雪量等级分布图配色表     | `CMA_COLORMAPS.SNOW_LEVEL_CMAP` | `<base_folder>/CMA_COLORMAPS/SNOW_LEVEL_CMAP.csv` | `<img_folder>/降雪量等级分布图配色表_demo.png` |
+| 850hPa相对湿度色标(台风湿度诊断 采自国家气象信息中心)     | `CMA_COLORMAPS.RH850_CMAP` | `<base_folder>/CMA_COLORMAPS/RH850_CMAP.csv` | `<img_folder>/850hPa相对湿度色标(台风湿度诊断 采自国家气象信息中心)_demo.png` |
+| 气温距平分布图配色表     | `CMA_COLORMAPS.TEMP_ANO_CMAP` | `<base_folder>/CMA_COLORMAPS/TEMP_ANO_CMAP.csv` | `<img_folder>/气温距平分布图配色表_demo.png` |
 
 #### 色标样例
 
@@ -311,11 +340,17 @@ geo_colormaps.colormap_picker()
 
 #### 包含色标
 
-
-| 色标描述         | 变量名                         | 定义文件位置                                | 示例图位置                |
-| ---------------- | ------------------------------ | ----------------------------                | ------------------------  |
-| 1h降水量色标     | `OTHER_COLORMAPS.RAIN_1H_CMAP` | `colormap_defs/other_colormaps/rain_1h.csv` | `images/other_colormaps/` |
-
+| 色标描述      | 变量名        | 定义文件位置        | 示例图位置      |
+| --------------| ------------- | --------------------| --------------- |
+| 6h降水量色标     | `OTHER_COLORMAPS.RAIN_6H_CMAP` | `<base_folder>/OTHER_COLORMAPS/RAIN_6H_CMAP.csv` | `<img_folder>/6h降水量色标_demo.png` |
+| 云顶温度色标     | `OTHER_COLORMAPS.CTT_CONTI_CMAP` | `<base_folder>/OTHER_COLORMAPS/CTT_CONTI_CMAP.csv` | `<img_folder>/云顶温度色标_demo.png` |
+| 3h降水量色标     | `OTHER_COLORMAPS.RAIN_3H_CMAP` | `<base_folder>/OTHER_COLORMAPS/RAIN_3H_CMAP.csv` | `<img_folder>/3h降水量色标_demo.png` |
+| 1h降水量色标     | `OTHER_COLORMAPS.RAIN_1H_CMAP` | `<base_folder>/OTHER_COLORMAPS/RAIN_1H_CMAP.csv` | `<img_folder>/1h降水量色标_demo.png` |
+| 云顶高色标     | `OTHER_COLORMAPS.CTH_CONTI_CMAP` | `<base_folder>/OTHER_COLORMAPS/CTH_CONTI_CMAP.csv` | `<img_folder>/云顶高色标_demo.png` |
+| 相对湿度色标     | `OTHER_COLORMAPS.RH_CMAP` | `<base_folder>/OTHER_COLORMAPS/RH_CMAP.csv` | `<img_folder>/相对湿度色标_demo.png` |
+| 12h降水量色标     | `OTHER_COLORMAPS.RAIN_12H_CMAP` | `<base_folder>/OTHER_COLORMAPS/RAIN_12H_CMAP.csv` | `<img_folder>/12h降水量色标_demo.png` |
+| 温度色标     | `OTHER_COLORMAPS.TEMP_CMAP` | `<base_folder>/OTHER_COLORMAPS/TEMP_CMAP.csv` | `<img_folder>/温度色标_demo.png` |
+| 24降水量色标     | `OTHER_COLORMAPS.RAIN_24H_CMAP` | `<base_folder>/OTHER_COLORMAPS/RAIN_24H_CMAP.csv` | `<img_folder>/24降水量色标_demo.png` |
 
 
 #### 色标样例
@@ -377,10 +412,59 @@ import geo_colormaps
 print(geo_colormaps.MY_COLORMAPS.PRE_TOTAL_CMAP)
 ```
 
+
+若想定义连续渐变类型的色标:
+
+1. 把vmin, vmax设成相同数值（除了两端用于标记向下、向上溢出的None以外）
+2. 同时**保持label列为空**
+
+例如：
+
+```
+description=海表温度色标(采自国家气象信息中心，渐变版)
+unit=r'$^{\circ}C$'
+vmin , vmax , r   , g   , b   , label
+None , 16   , 0   , 0   , 255 ,
+16   , 16   , 0   , 0   , 255 ,
+17   , 17   , 0   , 77  , 255 ,
+18   , 18   , 0   , 155 , 255 ,
+19   , 19   , 0   , 232 , 255 ,
+20   , 20   , 2   , 239 , 204 ,
+21   , 21   , 4   , 216 , 131 ,
+22   , 22   , 7   , 193 , 59  ,
+23   , 23   , 37  , 188 , 13  ,
+24   , 24   , 110 , 210 , 9   ,
+25   , 25   , 182 , 233 , 4   ,
+26   , 26   , 255 , 255 , 0   ,
+27   , 27   , 255 , 230 , 0   ,
+28   , 28   , 255 , 203 , 0   ,
+29   , 29   , 255 , 176 , 0   ,
+30   , 30   , 255 , 135 , 0   ,
+31   , 31   , 255 , 85  , 0   ,
+32   , 32   , 255 , 35  , 0   ,
+33   , 33   , 240 , 0   , 12  ,
+34   , 34   , 189 , 0   , 54  ,
+35   , 35   , 138 , 0   , 95  ,
+35   , None , 87  , 0   , 136 ,
+```
+
+此时，色标将把16, 17, ..., 35 设置成20个“铆点”，并使用相应的`(r, g, b)`色值定义铆点颜色。
+铆点之间使用线性插值插值`r`, `g`, `b` 通道。
+
+使用该色标绘图效果可见下图`(c)`:
+
+![create_cmap_from_levels_示例图](images/custom_colormap_from_levels_demo.png)
+
+
 更多csv示例见 `colormap_defs/cma_colormaps`, `colormap_defs/radar_colormaps`。
 
 
 ## Changelog
+
+### v0.3.0
+
++ 添加渐变色标定义支持
++ 添加3个渐变色标: `CMA_COLORMAPS.SST_CONTI_CMAP`, `OTHER_COLORMAPS.CTT_CONTI_CMAP`, `OTHER_COLORMAPS.CTH_CONTI_CMAP`.
 
 ### v0.2.0
 
